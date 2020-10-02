@@ -1,0 +1,5 @@
+r, g, b, color, nitrato, nitrito, amonia
+181, 230, 99, red, 10, 11, 12
+23, 186, 241, blue, 17, 19, 21
+99, 23, 153, orange, 9, 15, 4
+231, 99, 29, yellow, 20, 7, 10

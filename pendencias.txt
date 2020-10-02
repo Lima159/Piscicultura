@@ -1,0 +1,9 @@
+Deliberacoes:
+   Proxima reuniao Sabado 26/09 as 17:00;
+. Melhor dia para nossa reunioes;
+. Trazer para o programa as tabelas de niveis aceitaveis de amonia, nitrito e nitrato.(artigo Kubiza) (deixar aberto para o usuario)
+. Sugestao: criei uma tabela ficticia de niveis de cores para os parametros.(deixar aberto para o usuario)
+. Flexibilizar a configuracao de usuario para niveis das parametros nas cores;
+. Fazer a comparacao entre a leitura da amostra (figura) e a tabela de parametros;
+. Apresentar a analise deste.    
+    

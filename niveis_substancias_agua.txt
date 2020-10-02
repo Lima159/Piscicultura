@@ -1,0 +1,17 @@
+Segundo Kubitza
+
+amonia: 
+ - nao ionizada a partir de 0,20 mg/L ja e ruim
+ - niveis de amonia entre 0,70 e 2,40 mg/L podem ser letais para os peixes
+ - Exposicao continua ou frequente a concentracoes de amonia toxica acima de 0,02 mg/L pode causar intensa irritacao e inflamacao nas branquias
+
+nitrito:
+ - Em sistema de criacao em agua doce e dependendo da especie, niveis de nitrito de 0,7 a 200 mg/l, pode causar alta mortalidade de peixes no cultivo.
+ - Exposicao constante a niveis subletais de nitrito (0,3 a 0,5mg/l.) pode causar reducao no crescimento e na resistencia dos peixes as doencas
+
+nitrato:
+ -  Concentracoes de nitrato de ate 150 mg/l N-NO3? foram consideradas seguras
+
+amonia: 0.941...
+nitrito: 8.835
+nitrato: 1.2375

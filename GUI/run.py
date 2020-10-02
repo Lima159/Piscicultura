@@ -268,5 +268,5 @@ if __name__ == '__main__':
     app = QApplication(sys.argv)
     imageViewer = QImageViewer()
     imageViewer.show()
-    imageViewer.setWindowTitle("Monitoramento de Piscicultura")
+    imageViewer.setWindowTitle("AquaSys")
     sys.exit(app.exec_())
