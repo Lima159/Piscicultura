@@ -7,20 +7,17 @@ from PyQt5.QtPrintSupport import QPrintDialog, QPrinter
 #from PyQt5.QtWidgets import QLabel, QSizePolicy, QScrollArea, QMessageBox, QMainWindow, QMenu, QAction, \
 #    qApp, QFileDialog, QTableView, QTableWidget, QTableWidgetItem, QWidget
 from PyQt5.QtWidgets import *
-import coletarAmostra, cinza, cantizacao
+import coletarAmostra, cinza, cantizacao, readFiles
 import os, sys
 from PIL import Image
 import webcolors
 from googletrans import Translator
+from colorthief import ColorThief
 
 class ColorWindow(QMainWindow):
     def __init__(self, r, g, b):
         super().__init__()
-
-        print("R:",r)      
-        print("G:",g)      
-        print("B:",b)
-
+        
         self.height = 300
         self.width = 300
         requested_colour = (r, g, b)
@@ -84,14 +81,20 @@ class QImageViewer(QMainWindow):
 
     #REALIZA CLICK PARA OBTER COORDENADA
     def getCoordenada(self):
+        color_thief = ColorThief(self.fileName)
+        dominant_color = color_thief.get_color(quality=1)
+        print("Dominante:", dominant_color)
+        #self.colorView = ColorWindow(dominant_color[0], dominant_color[1], dominant_color[2])
+        #self.colorView.show()
+        closest_color = readFiles.get_closet_color(list(dominant_color))
+        self.colorView = ColorWindow(closest_color[0][0], closest_color[0][1], closest_color[0][2])
+        self.colorView.show()
         #im = Image.open(self.fileName)
-        self.image=QtGui.QImage(self.fileName)
+        """self.image=QtGui.QImage(self.fileName)
         self.pixmap=QtGui.QPixmap.fromImage(self.image)
         self.imageLabel.setPixmap(self.pixmap)
         self.check = True
-        self.imageLabel.mousePressEvent=self.getPixel
-        #pix = im.load()
-        #print (pix[x,y])
+        self.imageLabel.mousePressEvent=self.getPixel"""
 
     #OBTEM COR A PARTIR DA COORDENADA
     def getPixel(self, event):
@@ -107,8 +110,9 @@ class QImageViewer(QMainWindow):
             
             self.colorView = ColorWindow(r, g, b)
             self.colorView.show()  
+        
 
-        self.check = False
+        #self.check = False
         #print("X=",x," y= ",y)        
 
     def coletarAmostra(self):
@@ -194,10 +198,7 @@ class QImageViewer(QMainWindow):
             self.normalSize()
 
         self.updateActions()
-
-    def mensuraAmostra(self):
-        self.scaleImage(0.8)
-
+    
     def createActions(self):
         self.openAct = QAction("&Open...", self, shortcut="Ctrl+O", triggered=self.open)
         self.printAct = QAction("&Print...", self, shortcut="Ctrl+P", enabled=False, triggered=self.print_)
@@ -211,8 +212,7 @@ class QImageViewer(QMainWindow):
         self.filtroCantizacao = QAction("&Cantizacao", self, triggered=self.filtroCantizacao)
         self.coletarAmostra = QAction("&Coletar Amostra", self, triggered=self.coletarAmostra)
         self.getCoordenada = QAction("&RGB", self, triggered=self.getCoordenada)
-        self.mensuraAmostra = QAction("&Mensuracao", self, triggered=self.mensuraAmostra)
-
+        
     def createMenus(self):
         self.fileMenu = QMenu("&File", self)
         self.fileMenu.addAction(self.openAct)
@@ -234,8 +234,7 @@ class QImageViewer(QMainWindow):
 
         self.analiseMenu = QMenu("&Analise", self)
         self.analiseMenu.addAction(self.getCoordenada)
-        self.analiseMenu.addAction(self.mensuraAmostra)
-
+        
         self.menuBar().addMenu(self.fileMenu)
         self.menuBar().addMenu(self.viewMenu)
         self.menuBar().addMenu(self.processMenu)
