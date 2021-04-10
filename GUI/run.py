@@ -15,35 +15,54 @@ from googletrans import Translator
 from colorthief import ColorThief
 
 class ColorWindow(QMainWindow):
-    def __init__(self, r, g, b):
-        super().__init__()
-        
-        self.height = 300
-        self.width = 300
-        requested_colour = (r, g, b)
+    def getNameColor(self):
         try:
-            nameColor = webcolors.rgb_to_name(requested_colour)
+            self.nameColor = webcolors.rgb_to_name(self.requested_colour)
         except ValueError:
             min_colours = {}
             for key, name in webcolors.css3_hex_to_names.items():
                 r_c, g_c, b_c = webcolors.hex_to_rgb(key)
-                rd = (r_c - requested_colour[0]) ** 2
-                gd = (g_c - requested_colour[1]) ** 2
-                bd = (b_c - requested_colour[2]) ** 2
+                rd = (r_c - self.requested_colour[0]) ** 2
+                gd = (g_c - self.requested_colour[1]) ** 2
+                bd = (b_c - self.requested_colour[2]) ** 2
                 min_colours[(rd + gd + bd)] = name
-            nameColor = min_colours[min(min_colours.keys())]
+            self.nameColor = min_colours[min(min_colours.keys())]
+
+    def __init__(self, r1, g1, b1, r2, g2, b2):
+        super().__init__()
         
+        self.height = 300
+        self.width = 300
+        self.requested_colour = (r1, g1, b1)        
+        self.getNameColor()
+
         translator = Translator()
-        tl = translator.translate(nameColor, dest='pt')
-        print(tl)
-        textColor = QLabel(parent=self, text="COR: " + nameColor)
-        textColor.setGeometry(20,20, 100, 100)
-        textColor.setAlignment(Qt.AlignLeft) 
-        buttonColor = QPushButton(parent=self, text='')
-        buttonColor.setEnabled(False)
-        buttonColor.setStyleSheet("background-color:rgb(" + str(r) + "," + str(g) + "," + str(b) + ")");
-        buttonColor.setGeometry(170,20, 100, 100)
-        self.resize(300, 300)
+        #tl = translator.translate(nameColor, dest='pt')
+        #print(tl)
+        textColorAprox = QLabel(parent=self, text="Cor aprox: " + self.nameColor)
+        textColorAprox.setGeometry(20,20, 100, 100)
+        textColorAprox.setAlignment(Qt.AlignLeft) 
+        buttonColorAprox = QPushButton(parent=self, text='')
+        buttonColorAprox.setEnabled(False)
+        buttonColorAprox.setStyleSheet("background-color:rgb(" + str(r1) + "," + str(g1) + "," + str(b1) + ")");
+        buttonColorAprox.setGeometry(170,20, 100, 100)
+
+        self.requested_colour = (r2, g2, b2)        
+        self.getNameColor()
+        textColorPred = QLabel(parent=self, text="Cor pred: " + self.nameColor)
+        textColorPred.setGeometry(20,150, 100, 100)
+        textColorPred.setAlignment(Qt.AlignLeft) 
+        buttonColorPred = QPushButton(parent=self, text='')
+        buttonColorPred.setEnabled(False)
+        buttonColorPred.setStyleSheet("background-color:rgb(" + str(r2) + "," + str(g2) + "," + str(b2) + ")");
+        buttonColorPred.setGeometry(170,150, 100, 100)
+        
+        buttonParse = QPushButton(parent=self, text='Análisar Substâncias')
+        buttonParse.setGeometry(120,290, 120, 30)
+
+        self.resize(350, 350)
+
+    
 
 class QImageViewer(QMainWindow):
     def __init__(self):
@@ -55,16 +74,7 @@ class QImageViewer(QMainWindow):
         self.check = True
 
         self.imageLabel = QLabel()
-        #self.imageLabel.setBackgroundRole(QPalette.Base)
         self.imageLabel.setGeometry(QtCore.QRect(0, 0, self.width(), self.height()))
-        #self.imageLabel.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
-        #self.imageLabel.setScaledContents(True)    
-
-        #self.imgLabel = QLabel(self)
-        #self.imgLabel.setGeometry(QtCore.QRect(20, 60, 200, 200))
-        #self.imgLabel.setText("HELLO")
-
-        #self.criarTableView()
        
         self.scrollArea = QScrollArea()
         self.scrollArea.setBackgroundRole(QPalette.Dark)
@@ -87,7 +97,8 @@ class QImageViewer(QMainWindow):
         #self.colorView = ColorWindow(dominant_color[0], dominant_color[1], dominant_color[2])
         #self.colorView.show()
         closest_color = readFiles.get_closet_color(list(dominant_color))
-        self.colorView = ColorWindow(closest_color[0][0], closest_color[0][1], closest_color[0][2])
+        self.colorView = ColorWindow(closest_color[0][0], closest_color[0][1], closest_color[0][2], dominant_color[0], dominant_color[1], dominant_color[2])
+        self.colorView.setWindowTitle("Análise de cores");
         self.colorView.show()
         #im = Image.open(self.fileName)
         """self.image=QtGui.QImage(self.fileName)
@@ -129,11 +140,6 @@ class QImageViewer(QMainWindow):
         self.scaleFactor = 1.0 
 
         self.scrollArea.setVisible(True)
-        #self.fitToWindowAct.setEnabled(True)
-        #self.updateActions()
-
-        #print(type(qimage))
-        #print(type(imagemEmTonsDeCinza))
 
     def filtroCantizacao(self):
         imagemCantizada = cantizacao.filtro(self)
@@ -163,7 +169,7 @@ class QImageViewer(QMainWindow):
 
             self.scrollArea.setVisible(True)
             self.printAct.setEnabled(True)
-            #self.fitToWindowAct.setEnabled(True)
+            self.fitToWindowAct.setEnabled(True)
             self.updateActions()
             self.resize(image.width() + 130, image.height() + 40)
             
