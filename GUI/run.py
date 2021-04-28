@@ -31,8 +31,7 @@ class ColorWindow(QMainWindow):
     def __init__(self, r1, g1, b1, r2, g2, b2):
         super().__init__()
         
-        self.height = 300
-        self.width = 300
+        self.setFixedSize(300, 350)
         self.requested_colour = (r1, g1, b1)        
         self.getNameColor()
 
@@ -56,13 +55,59 @@ class ColorWindow(QMainWindow):
         buttonColorPred.setEnabled(False)
         buttonColorPred.setStyleSheet("background-color:rgb(" + str(r2) + "," + str(g2) + "," + str(b2) + ")");
         buttonColorPred.setGeometry(170,150, 100, 100)
-        
-        buttonParse = QPushButton(parent=self, text='Análisar Substâncias')
-        buttonParse.setGeometry(120,290, 120, 30)
 
-        self.resize(350, 350)
+        self.frame = QGroupBox(self)    
+        self.frame.setTitle("Análises")   
+        self.frame.setGeometry(20, 270, 250, 60)     
 
-    
+        buttonParseAmonia = QPushButton(parent=self, text='Amonia')
+        buttonParseAmonia.setGeometry(30, 290, 70, 30)
+
+        buttonParseNitrato = QPushButton(parent=self, text='Nitrato')
+        buttonParseNitrato.setGeometry(110, 290, 70, 30)
+
+        buttonParseNitrito = QPushButton(parent=self, text='Nitrito')
+        buttonParseNitrito.setGeometry(190, 290, 70, 30)
+
+class CalibrateWindow(QWidget):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Calibrar dados")
+        self.resize(270, 110)
+        layout = QFormLayout()
+
+        self.textFabricante = QLineEdit(self)
+        layout.addRow("Fabricante:", self.textFabricante)
+
+        self.textSubstancia = QLineEdit(self)
+        layout.addRow("Substância:", self.textSubstancia)
+
+        self.buttonArquivo = QPushButton('Abrir arquivo', self)
+        self.buttonArquivo.clicked.connect(self.openFile)   
+        layout.addRow("Documento:", self.buttonArquivo)
+
+        self.button = QPushButton('Confirmar', enabled=False)
+        self.button.clicked.connect(self.clickme)
+
+        layout.addRow(self.button)
+
+        self.textFabricante.textChanged.connect(self.disableButton)
+        self.textSubstancia.textChanged.connect(self.disableButton)
+
+        self.setLayout(layout)
+
+    def openFile(self):   
+        options = QFileDialog.Options()
+        self.fileName = QFileDialog.getOpenFileName(self, 'QFileDialog.getOpenFileName()', '',
+                                                  'Images (*.png *.jpeg *.jpg *.bmp *.gif)', options=options)
+
+    def disableButton(self):
+        self.button.setEnabled(bool(self.textFabricante.text()) and bool(self.textSubstancia.text()))
+
+    def clickme(self):
+        print("Fabricante:", self.textFabricante.text())
+        print("Substancia:", self.textSubstancia.text())
+        print("Arquivo:", self.fileName)
 
 class QImageViewer(QMainWindow):
     def __init__(self):
@@ -94,18 +139,10 @@ class QImageViewer(QMainWindow):
         color_thief = ColorThief(self.fileName)
         dominant_color = color_thief.get_color(quality=1)
         print("Dominante:", dominant_color)
-        #self.colorView = ColorWindow(dominant_color[0], dominant_color[1], dominant_color[2])
-        #self.colorView.show()
         closest_color = readFiles.get_closet_color(list(dominant_color))
         self.colorView = ColorWindow(closest_color[0][0], closest_color[0][1], closest_color[0][2], dominant_color[0], dominant_color[1], dominant_color[2])
         self.colorView.setWindowTitle("Análise de cores");
         self.colorView.show()
-        #im = Image.open(self.fileName)
-        """self.image=QtGui.QImage(self.fileName)
-        self.pixmap=QtGui.QPixmap.fromImage(self.image)
-        self.imageLabel.setPixmap(self.pixmap)
-        self.check = True
-        self.imageLabel.mousePressEvent=self.getPixel"""
 
     #OBTEM COR A PARTIR DA COORDENADA
     def getPixel(self, event):
@@ -114,17 +151,15 @@ class QImageViewer(QMainWindow):
             y = event.pos().y()
             print("X=",x," y= ",y)
             im = Image.open(self.fileName)
-            #pix = im.load()
-            #print(pix[x, y]) 
             pix = im.convert('RGB')  
             r, g, b = pix.getpixel((x, y))
             
             self.colorView = ColorWindow(r, g, b)
-            self.colorView.show()  
-        
+            self.colorView.show()
 
-        #self.check = False
-        #print("X=",x," y= ",y)        
+    def Calibrar(self):
+        self.calibrarView = CalibrateWindow()
+        self.calibrarView.show()
 
     def coletarAmostra(self):
         coletarAmostra.coleta(self) 
@@ -218,6 +253,7 @@ class QImageViewer(QMainWindow):
         self.filtroCantizacao = QAction("&Cantizacao", self, triggered=self.filtroCantizacao)
         self.coletarAmostra = QAction("&Coletar Amostra", self, triggered=self.coletarAmostra)
         self.getCoordenada = QAction("&RGB", self, triggered=self.getCoordenada)
+        self.Calibrar = QAction("&Calibrar", self, triggered=self.Calibrar)
         
     def createMenus(self):
         self.fileMenu = QMenu("&File", self)
@@ -239,6 +275,7 @@ class QImageViewer(QMainWindow):
         self.processMenu.addAction(self.filtroCantizacao)
 
         self.analiseMenu = QMenu("&Analise", self)
+        self.analiseMenu.addAction(self.Calibrar)
         self.analiseMenu.addAction(self.getCoordenada)
         
         self.menuBar().addMenu(self.fileMenu)
@@ -274,4 +311,5 @@ if __name__ == '__main__':
     imageViewer = QImageViewer()
     imageViewer.show()
     imageViewer.setWindowTitle("AquaSys")
+    imageViewer.setWindowIcon(QtGui.QIcon('fish.png'))
     sys.exit(app.exec_())
