@@ -4,9 +4,12 @@ from PyQt5.QtCore import Qt
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtGui import QImage, QPixmap, QPalette, QPainter
 from PyQt5.QtPrintSupport import QPrintDialog, QPrinter
+from PyQt5.QtCore import QTimer,QDateTime
+from PyQt5.QtGui import QIcon
 #from PyQt5.QtWidgets import QLabel, QSizePolicy, QScrollArea, QMessageBox, QMainWindow, QMenu, QAction, \
 #    qApp, QFileDialog, QTableView, QTableWidget, QTableWidgetItem, QWidget
 from PyQt5.QtWidgets import *
+from PyQt5.QtGui import * 
 import coletarAmostra, cinza, cantizacao, readFiles
 import os, sys
 from PIL import Image
@@ -31,36 +34,42 @@ class ColorWindow(QMainWindow):
     def __init__(self, r1, g1, b1, r2, g2, b2):
         super().__init__()
         
+        print(r1, g1, b1, r2, g2, b2)
+
+        self.setWindowIcon(QtGui.QIcon('resources/color.png'))
         self.setFixedSize(300, 350)
         self.requested_colour = (r1, g1, b1)        
-        self.getNameColor()
+        #self.getNameColor()
 
         translator = Translator()
         #tl = translator.translate(nameColor, dest='pt')
         #print(tl)
-        textColorAprox = QLabel(parent=self, text="Cor aprox: " + self.nameColor)
+        textColorAprox = QLabel(parent=self, text="Cor aproximada" ) #+ self.nameColor
         textColorAprox.setGeometry(20,20, 100, 100)
         textColorAprox.setAlignment(Qt.AlignLeft) 
+        textColorAprox.setFont(QFont('Arial', 9))
         buttonColorAprox = QPushButton(parent=self, text='')
         buttonColorAprox.setEnabled(False)
         buttonColorAprox.setStyleSheet("background-color:rgb(" + str(r1) + "," + str(g1) + "," + str(b1) + ")");
         buttonColorAprox.setGeometry(170,20, 100, 100)
 
         self.requested_colour = (r2, g2, b2)        
-        self.getNameColor()
-        textColorPred = QLabel(parent=self, text="Cor pred: " + self.nameColor)
+        #self.getNameColor()
+        textColorPred = QLabel(parent=self, text="Cor predominante" )#+ self.nameColor
         textColorPred.setGeometry(20,150, 100, 100)
         textColorPred.setAlignment(Qt.AlignLeft) 
+        textColorPred.setFont(QFont('Arial', 9))
         buttonColorPred = QPushButton(parent=self, text='')
         buttonColorPred.setEnabled(False)
         buttonColorPred.setStyleSheet("background-color:rgb(" + str(r2) + "," + str(g2) + "," + str(b2) + ")");
         buttonColorPred.setGeometry(170,150, 100, 100)
 
         self.frame = QGroupBox(self)    
-        self.frame.setTitle("Análises")   
+        self.frame.setFont(QFont('Arial', 9))
+        self.frame.setTitle("Selecionar análise")   
         self.frame.setGeometry(20, 270, 250, 60)     
 
-        buttonParseAmonia = QPushButton(parent=self, text='Amonia')
+        buttonParseAmonia = QPushButton(parent=self, text='Amônia')
         buttonParseAmonia.setGeometry(30, 290, 70, 30)
 
         buttonParseNitrato = QPushButton(parent=self, text='Nitrato')
@@ -73,7 +82,10 @@ class CalibrateWindow(QWidget):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Calibrar dados")
+        self.setWindowIcon(QtGui.QIcon('resources/adjust.png'))
         self.resize(270, 110)
+        self.setFixedSize(270, 110)
+        self.setWindowFlags(Qt.WindowStaysOnTopHint)
         layout = QFormLayout()
 
         self.textFabricante = QLineEdit(self)
@@ -98,8 +110,9 @@ class CalibrateWindow(QWidget):
 
     def openFile(self):   
         options = QFileDialog.Options()
-        self.fileName = QFileDialog.getOpenFileName(self, 'QFileDialog.getOpenFileName()', '',
-                                                  'Images (*.png *.jpeg *.jpg *.bmp *.gif)', options=options)
+        self.fileNameMeasurement, _ = QFileDialog.getOpenFileName(self, 'QFileDialog.getOpenFileName()', '',
+                                                  'Images (*.png *.jpeg *.jpg *.bmp *.gif *.pdf)', options=options)
+        print(self.fileNameMeasurement)
 
     def disableButton(self):
         self.button.setEnabled(bool(self.textFabricante.text()) and bool(self.textSubstancia.text()))
@@ -120,6 +133,7 @@ class QImageViewer(QMainWindow):
 
         self.imageLabel = QLabel()
         self.imageLabel.setGeometry(QtCore.QRect(0, 0, self.width(), self.height()))
+        self.imageLabel.setAlignment(Qt.AlignCenter)
        
         self.scrollArea = QScrollArea()
         self.scrollArea.setBackgroundRole(QPalette.Dark)
@@ -129,10 +143,26 @@ class QImageViewer(QMainWindow):
         self.setCentralWidget(self.scrollArea)
 
         self.createActions()
-        self.createMenus()       
+        self.createMenus()    
+        self.createToolBars()   
 
         self.setWindowTitle("Image Viewer")
         self.resize(800, 600)         
+
+    def createToolBars(self):
+        self.setToolButtonStyle(QtCore.Qt.ToolButtonTextBesideIcon)
+        self.menuBar = self.addToolBar("File")
+        self.menuBar.addAction(QIcon("resources/file.png"), "&Abrir Arquivo", self.open)
+        self.menuBar.addSeparator()
+        self.menuBar.addAction(QIcon("resources/camera.png"), "&Coletar Amostra", self.open)
+        self.menuBar.addSeparator()
+        self.menuBar.addAction(QIcon("resources/adjust.png"), "&Calibrar", self.calibrar)
+        self.menuBar.addSeparator()
+        self.menuBar.addAction(QIcon("resources/analyze.png"), "&Analisar Amostra", self.getCoordenada)
+        self.menuBar.addSeparator()
+        self.menuBar.addAction(QIcon("resources/help.png"), "&Help")
+        self.menuBar.addSeparator()
+        self.menuBar.addAction(QIcon("resources/exit.png"), "&Sair", self.close)
 
     #REALIZA CLICK PARA OBTER COORDENADA
     def getCoordenada(self):
@@ -157,7 +187,7 @@ class QImageViewer(QMainWindow):
             self.colorView = ColorWindow(r, g, b)
             self.colorView.show()
 
-    def Calibrar(self):
+    def calibrar(self):
         self.calibrarView = CalibrateWindow()
         self.calibrarView.show()
 
@@ -196,7 +226,7 @@ class QImageViewer(QMainWindow):
             image = QImage(self.fileName)
             #print(type(image))
             if image.isNull():
-                QMessageBox.information(self, "Image Viewer", "Cannot load %s." % fileName)
+                QMessageBox.information(self, "Image Viewer", "Cannot load %s." % self.fileName)
                 return
 
             self.imageLabel.setPixmap(QPixmap.fromImage(image))
@@ -206,7 +236,7 @@ class QImageViewer(QMainWindow):
             self.printAct.setEnabled(True)
             self.fitToWindowAct.setEnabled(True)
             self.updateActions()
-            self.resize(image.width() + 130, image.height() + 40)
+            #self.resize(image.width() + 130, image.height() + 40)
             
             #if not self.fitToWindowAct.isChecked():
             #    self.imageLabel.adjustSize()
@@ -252,8 +282,8 @@ class QImageViewer(QMainWindow):
         self.filtroCinza = QAction("&Cinza", self, triggered=self.filtroCinza)
         self.filtroCantizacao = QAction("&Cantizacao", self, triggered=self.filtroCantizacao)
         self.coletarAmostra = QAction("&Coletar Amostra", self, triggered=self.coletarAmostra)
-        self.getCoordenada = QAction("&RGB", self, triggered=self.getCoordenada)
-        self.Calibrar = QAction("&Calibrar", self, triggered=self.Calibrar)
+        self.getCoordenad = QAction("&RGB", self, triggered=self.getCoordenada)
+        self.Calibrar = QAction("&Calibrar", self, triggered=self.calibrar)
         
     def createMenus(self):
         self.fileMenu = QMenu("&File", self)
@@ -276,7 +306,7 @@ class QImageViewer(QMainWindow):
 
         self.analiseMenu = QMenu("&Analise", self)
         self.analiseMenu.addAction(self.Calibrar)
-        self.analiseMenu.addAction(self.getCoordenada)
+        self.analiseMenu.addAction(self.getCoordenad)
         
         self.menuBar().addMenu(self.fileMenu)
         self.menuBar().addMenu(self.viewMenu)
@@ -312,4 +342,9 @@ if __name__ == '__main__':
     imageViewer.show()
     imageViewer.setWindowTitle("AquaSys")
     imageViewer.setWindowIcon(QtGui.QIcon('fish.png'))
+
+    splash = QSplashScreen(QPixmap('ifba.jpg'))
+    splash.show()
+    QTimer.singleShot(2000, splash.close)
+
     sys.exit(app.exec_())
