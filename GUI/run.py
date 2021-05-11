@@ -143,7 +143,7 @@ class QImageViewer(QMainWindow):
         self.setCentralWidget(self.scrollArea)
 
         self.createActions()
-        self.createMenus()    
+        #self.createMenus()    
         self.createToolBars()   
 
         self.setWindowTitle("Image Viewer")
@@ -151,16 +151,19 @@ class QImageViewer(QMainWindow):
 
     def createToolBars(self):
         self.setToolButtonStyle(QtCore.Qt.ToolButtonTextBesideIcon)
-        self.menuBar = self.addToolBar("File")
+
+        self.menuBar = QtWidgets.QToolBar("Ações")
+        self.addToolBar(QtCore.Qt.LeftToolBarArea, self.menuBar)
+
         self.menuBar.addAction(QIcon("resources/file.png"), "&Abrir Arquivo", self.open)
         self.menuBar.addSeparator()
-        self.menuBar.addAction(QIcon("resources/camera.png"), "&Coletar Amostra", self.open)
+        self.menuBar.addAction(QIcon("resources/camera.png"), "&Coletar Amostra", self.coletarAmostra)
         self.menuBar.addSeparator()
         self.menuBar.addAction(QIcon("resources/adjust.png"), "&Calibrar", self.calibrar)
         self.menuBar.addSeparator()
         self.menuBar.addAction(QIcon("resources/analyze.png"), "&Analisar Amostra", self.getCoordenada)
         self.menuBar.addSeparator()
-        self.menuBar.addAction(QIcon("resources/help.png"), "&Help")
+        self.menuBar.addAction(QIcon("resources/help.png"), "&Ajuda")
         self.menuBar.addSeparator()
         self.menuBar.addAction(QIcon("resources/exit.png"), "&Sair", self.close)
 
@@ -281,7 +284,7 @@ class QImageViewer(QMainWindow):
                                       triggered=self.fitToWindow)
         self.filtroCinza = QAction("&Cinza", self, triggered=self.filtroCinza)
         self.filtroCantizacao = QAction("&Cantizacao", self, triggered=self.filtroCantizacao)
-        self.coletarAmostra = QAction("&Coletar Amostra", self, triggered=self.coletarAmostra)
+        self.coletarAmostras = QAction("&Coletar Amostra", self, triggered=self.coletarAmostra)
         self.getCoordenad = QAction("&RGB", self, triggered=self.getCoordenada)
         self.Calibrar = QAction("&Calibrar", self, triggered=self.calibrar)
         
@@ -300,7 +303,7 @@ class QImageViewer(QMainWindow):
         self.viewMenu.addAction(self.fitToWindowAct)
 
         self.processMenu = QMenu("&Amostra", self)
-        self.processMenu.addAction(self.coletarAmostra)
+        self.processMenu.addAction(self.coletarAmostras)
         self.processMenu.addAction(self.filtroCinza)
         self.processMenu.addAction(self.filtroCantizacao)
 
