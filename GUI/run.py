@@ -8,7 +8,7 @@ from PyQt5.QtCore import QTimer,QDateTime
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import * 
-import coletarAmostra, cinza, cantizacao, readFiles
+import coletarAmostra, readFiles
 from colorWindow import ColorWindow
 from keyboard import VirtualKeyboard
 import os, sys
@@ -91,29 +91,6 @@ class QImageViewer(QMainWindow):
     def coletarAmostra(self):
         coletarAmostra.coleta(self) 
 
-    def filtroCinza(self):
-        imagemEmTonsDeCinza = cinza.filtro(self)
-
-        imagemEmTonsDeCinza = cv2.resize(imagemEmTonsDeCinza, (500,500))
-        self.data = np.array(imagemEmTonsDeCinza).reshape(500,500).astype(np.int32)
-        qimage = QtGui.QImage(self.data, self.data.shape[0], self.data.shape[1], QtGui.QImage.Format_RGB32)
-
-        self.imageLabel.setPixmap(QPixmap.fromImage(qimage))
-        self.scaleFactor = 1.0 
-
-        self.scrollArea.setVisible(True)
-
-    def filtroCantizacao(self):
-        imagemCantizada = cantizacao.filtro(self)
-        imagemCantizada = cv2.resize(imagemCantizada, (500,500))
-        self.data = np.array(imagemCantizada).reshape(500,500).astype(np.int32)
-        qimage = QtGui.QImage(self.data, self.data.shape[0], self.data.shape[1], QtGui.QImage.Format_RGB32)
-
-        self.imageLabel.setPixmap(QPixmap.fromImage(qimage))
-        #self.scaleFactor = 1.0 
-
-        self.scrollArea.setVisible(True)
-
     def open(self):
         options = QFileDialog.Options()
         self.fileName, _ = QFileDialog.getOpenFileName(self, 'QFileDialog.getOpenFileName()', '',
@@ -176,8 +153,6 @@ class QImageViewer(QMainWindow):
         self.normalSizeAct = QAction("&Normal Size", self, shortcut="Ctrl+S", enabled=False, triggered=self.normalSize)
         self.fitToWindowAct = QAction("&Fit to Window", self, enabled=False, checkable=True, shortcut="Ctrl+F",
                                       triggered=self.fitToWindow)
-        self.filtroCinza = QAction("&Cinza", self, triggered=self.filtroCinza)
-        self.filtroCantizacao = QAction("&Cantizacao", self, triggered=self.filtroCantizacao)
         self.coletarAmostras = QAction("&Coletar Amostra", self, triggered=self.coletarAmostra)
         self.getCoordenad = QAction("&RGB", self, triggered=self.getCoordenada)
         self.Calibrar = QAction("&Calibrar", self, triggered=self.calibrar)
@@ -198,8 +173,6 @@ class QImageViewer(QMainWindow):
 
         self.processMenu = QMenu("&Amostra", self)
         self.processMenu.addAction(self.coletarAmostras)
-        self.processMenu.addAction(self.filtroCinza)
-        self.processMenu.addAction(self.filtroCantizacao)
 
         self.analiseMenu = QMenu("&Analise", self)
         self.analiseMenu.addAction(self.Calibrar)
