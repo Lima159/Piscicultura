@@ -1,6 +1,8 @@
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 from PyQt5 import QtGui
+from PIL import Image  
+import PIL  
 
 class InputState:
     LOWER = 0
@@ -45,6 +47,7 @@ class VirtualKeyboard(QWidget):
         self.horizontalLayoutSubstancia = QHBoxLayout()
         self.horizontalLayoutFabricante = QHBoxLayout()
         self.horizontalLayoutArquivo = QHBoxLayout()
+        self.horizontalLayoutConfirmar = QHBoxLayout()
 
         self.keyListByLines = [
                     ['q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p'],
@@ -58,8 +61,10 @@ class VirtualKeyboard(QWidget):
         self.stateButton.setText('Maiúsculo')
         self.backButton = QPushButton()
         self.backButton.setText('Apagar')
-        #self.okButton = QPushButton()
-        #self.okButton.setText('OK')
+
+        self.okButton = QPushButton()
+        self.okButton.setText('Confirmar')
+
         self.clearButton = QPushButton()
         self.clearButton.setText("Limpar")
 
@@ -88,7 +93,9 @@ class VirtualKeyboard(QWidget):
 
         self.stateButton.clicked.connect(self.switchState)
         self.backButton.clicked.connect(self.backspace)
-        #self.okButton.clicked.connect(self.emitInputString) 
+
+        self.okButton.clicked.connect(self.clickme) 
+
         self.clearButton.clicked.connect(self.emitCancel)
 
         self.buttonLayout.addWidget(self.clearButton)
@@ -111,7 +118,10 @@ class VirtualKeyboard(QWidget):
 
         self.horizontalLayoutArquivo.addWidget(self.labelArquivo)
         self.horizontalLayoutArquivo.addWidget(self.buttonArquivo, 1)
-        self.globalLayout.addLayout(self.horizontalLayoutArquivo);
+        self.globalLayout.addLayout(self.horizontalLayoutArquivo); 
+
+        self.horizontalLayoutConfirmar.addWidget(self.okButton)
+        self.globalLayout.addLayout(self.horizontalLayoutConfirmar);
 
         self.setSizePolicy(QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed))
 
@@ -149,6 +159,16 @@ class VirtualKeyboard(QWidget):
         self.fileNameMeasurement, _ = QFileDialog.getOpenFileName(self, 'QFileDialog.getOpenFileName()', '',
                                                   'Images (*.png *.jpeg *.jpg *.bmp *.gif *.pdf)', options=options)
         print(self.fileNameMeasurement)
+
+    def clickme(self):
+        fab = self.textFabricante.text()
+        subs = self.textSubstancia.currentText()
+        print("Fabricante:", fab)
+        print("Substancia:", subs)
+        print("Arquivo:", self.fileNameMeasurement)
+        picture = Image.open(self.fileNameMeasurement)  
+        picture = picture.save('C:\\Users\\Igor_\\OneDrive\\Área de Trabalho\\' + subs + '-' + fab + '.jpg')
+        self.close()
 """
 class Test(QWidget):
     def __init__(self):
