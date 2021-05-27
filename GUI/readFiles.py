@@ -9,8 +9,9 @@ def closest(colors,color): #busca a cor mais próxima numa lista pre definida
     smallest_distance = colors[index_of_smallest]
     return smallest_distance 
 
-def get_closet_color(color):
-	with open('tableColors.txt') as csv_file:
+def get_closet_color(color, arquivo):
+	print(arquivo)
+	with open(arquivo) as csv_file:
 	    csv_reader = csv.reader(csv_file, delimiter=',')
 	    array_colors = []
 	    line_count = 0

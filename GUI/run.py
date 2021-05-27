@@ -63,13 +63,20 @@ class QImageViewer(QMainWindow):
 
     #REALIZA CLICK PARA OBTER COORDENADA
     def getCoordenada(self):
+        mensuracao = self.getMensuracao()
         color_thief = ColorThief(self.fileName)
         dominant_color = color_thief.get_color(quality=1)
-        print("Dominante:", dominant_color)
-        closest_color = readFiles.get_closet_color(list(dominant_color))
+        #print("Dominante:", dominant_color)
+        closest_color = readFiles.get_closet_color(list(dominant_color), mensuracao)
         self.colorView = ColorWindow(closest_color[0][0], closest_color[0][1], closest_color[0][2], dominant_color[0], dominant_color[1], dominant_color[2])
         self.colorView.setWindowTitle("Análise de cores");
         self.colorView.show()
+
+    def getMensuracao(self):
+        options = QFileDialog.Options()
+        fileName, _ = QFileDialog.getOpenFileName(self, 'Selecione a mensuração que deseja utilizar na análise', '',
+                                                  'Mensuração (*.txt *.csv)', options=options)
+        return fileName
 
     #OBTEM COR A PARTIR DA COORDENADA
     def getPixel(self, event):
@@ -93,7 +100,7 @@ class QImageViewer(QMainWindow):
 
     def open(self):
         options = QFileDialog.Options()
-        self.fileName, _ = QFileDialog.getOpenFileName(self, 'QFileDialog.getOpenFileName()', '',
+        self.fileName, _ = QFileDialog.getOpenFileName(self, 'Selecione a imagem da amostra', '',
                                                   'Images (*.png *.jpeg *.jpg *.bmp *.gif)', options=options)
         print (self.fileName)
         if self.fileName:

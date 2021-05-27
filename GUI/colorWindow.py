@@ -21,7 +21,7 @@ class ColorWindow(QMainWindow):
     def __init__(self, r1, g1, b1, r2, g2, b2):
         super().__init__()
         
-        print(r1, g1, b1, r2, g2, b2)
+        #print(r1, g1, b1, r2, g2, b2)
 
         self.setWindowIcon(QtGui.QIcon('resources/color.png'))
         self.setFixedSize(300, 350)

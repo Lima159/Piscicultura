@@ -182,10 +182,11 @@ class VirtualKeyboard(QWidget):
         self.close()
 
     def criarArquivo(self, fab, subs, value):
+        path = "measurements/"
         name = subs + '.' + fab
         print("Nome do arquivo:", name)
         print("Array:", self.value)
-        with open(name + '.csv', 'w') as csvfile:
+        with open(path + name + '.csv', 'w', newline='') as csvfile:
             filewriter = csv.writer(csvfile, delimiter=',',
                 quotechar='|', quoting=csv.QUOTE_MINIMAL)
             filewriter.writerow(['Red', 'Green', 'Blue', 'Value'])
