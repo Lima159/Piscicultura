@@ -2,10 +2,11 @@ from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 from PyQt5 import QtGui
 from PyQt5.QtGui import QPixmap, QImage
-from PIL import Image  
 import PIL  
+from PIL import Image
 import cv2
 import numpy as np
+import csv
 
 class InputState:
     LOWER = 0
@@ -165,8 +166,8 @@ class VirtualKeyboard(QWidget):
 
         calibrarWindow = CalibramentoWindow(self.fileNameMeasurement)
         calibrarWindow.exec_()
-        value = calibrarWindow.getTabela()
-        print("Pegou valor:", value)
+        self.value = calibrarWindow.getTabela()
+        #print("Pegou valor:", self.value)
         #return value
         
     def clickme(self):
@@ -175,15 +176,27 @@ class VirtualKeyboard(QWidget):
         print("Fabricante:", fab)
         print("Substancia:", subs)
         print("Arquivo:", self.fileNameMeasurement)
-        picture = Image.open(self.fileNameMeasurement)  
-        picture = picture.save('C:\\Users\\Igor_\\OneDrive\\Área de Trabalho\\' + subs + '-' + fab + '.jpg')
+        #picture = Image.open(self.fileNameMeasurement)  
+        #picture = picture.save('C:\\Users\\Igor_\\OneDrive\\Área de Trabalho\\' + subs + '-' + fab + '.jpg')
+        self.criarArquivo(fab, subs, self.value);
         self.close()
+
+    def criarArquivo(self, fab, subs, value):
+        name = subs + '.' + fab
+        print("Nome do arquivo:", name)
+        print("Array:", self.value)
+        with open(name + '.csv', 'w') as csvfile:
+            filewriter = csv.writer(csvfile, delimiter=',',
+                quotechar='|', quoting=csv.QUOTE_MINIMAL)
+            filewriter.writerow(['Red', 'Green', 'Blue', 'Value'])
+            filewriter.writerows(self.value)
+
 
 class CalibramentoWindow(QDialog):
     def __init__(self, image):
         super().__init__()
 
-        self.tabela = []
+        self.arquivo = []
         #self.setFixedSize(300, 350)
         self.setWindowFlags(Qt.WindowStaysOnTopHint)
 
@@ -230,15 +243,17 @@ class CalibramentoWindow(QDialog):
 
     def adicionarValorALista(self, r, g, b, value):
         #print("NOVA LINHA")
+        self.tabela = []
         self.tabela.append(r)
         self.tabela.append(g)
         self.tabela.append(b)
         self.tabela.append(value)
-        print("+ Linha", self.tabela)
+        self.arquivo.append(self.tabela)
+        print("+ Linha", self.arquivo)
         #self.close()
 
     def getTabela(self):
-        return self.tabela
+        return self.arquivo
 
     def convertQImageToMat(self, incomingImage):
         incomingImage = incomingImage.convertToFormat(4)
