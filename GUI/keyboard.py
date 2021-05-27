@@ -1,8 +1,11 @@
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 from PyQt5 import QtGui
+from PyQt5.QtGui import QPixmap, QImage
 from PIL import Image  
 import PIL  
+import cv2
+import numpy as np
 
 class InputState:
     LOWER = 0
@@ -154,12 +157,18 @@ class VirtualKeyboard(QWidget):
     def sizeHint(self):
         return QSize(480,272)
 
-    def openFile(self):   
+    def openFile(self):
         options = QFileDialog.Options()
         self.fileNameMeasurement, _ = QFileDialog.getOpenFileName(self, 'QFileDialog.getOpenFileName()', '',
-                                                  'Images (*.png *.jpeg *.jpg *.bmp *.gif *.pdf)', options=options)
+                                                                          'Images (*.png *.jpeg *.jpg *.bmp *.gif *.pdf)', options=options)
         print(self.fileNameMeasurement)
 
+        calibrarWindow = CalibramentoWindow(self.fileNameMeasurement)
+        calibrarWindow.exec_()
+        value = calibrarWindow.getTabela()
+        print("Pegou valor:", value)
+        #return value
+        
     def clickme(self):
         fab = self.textFabricante.text()
         subs = self.textSubstancia.currentText()
@@ -169,26 +178,119 @@ class VirtualKeyboard(QWidget):
         picture = Image.open(self.fileNameMeasurement)  
         picture = picture.save('C:\\Users\\Igor_\\OneDrive\\Área de Trabalho\\' + subs + '-' + fab + '.jpg')
         self.close()
-"""
-class Test(QWidget):
+
+class CalibramentoWindow(QDialog):
+    def __init__(self, image):
+        super().__init__()
+
+        self.tabela = []
+        #self.setFixedSize(300, 350)
+        self.setWindowFlags(Qt.WindowStaysOnTopHint)
+
+        self.fileName = QImage(image)        
+        self.imageLabel = QLabel()
+        self.imageLabel.setPixmap(QPixmap.fromImage(self.fileName))
+
+        self.clickButton = QPushButton('Clique no ponto e informe o nível da substância')
+        self.clickButton.clicked.connect(self.getCoordenada)
+
+        wid = QWidget(self)
+        #self.setCentralWidget(wid)
+        self.layout = QVBoxLayout(self)
+        self.layout.addWidget(self.clickButton)
+        self.layout.addWidget(self.imageLabel)
+        wid.setLayout(self.layout)
+
+
+    def getCoordenada(self):
+        self.image=QtGui.QImage(self.fileName)
+        self.pixmap=QtGui.QPixmap.fromImage(self.image)
+        self.imageLabel.setPixmap(self.pixmap)
+        self.check = True
+        self.imageLabel.mousePressEvent=self.getPixel
+
+    def getPixel(self, event):
+        if self.check:
+            x = event.pos().x()
+            y = event.pos().y()
+            #print("X=",x," y= ",y)
+            #print(self.fileName)
+            im = self.convertQImageToMat(self.fileName)
+            im = Image.fromarray(im)
+            pix = im.load()
+            #print(pix[x, y]) 
+            pix = im.convert('RGB')  
+            r, g, b = pix.getpixel((x, y))
+            #print("X=",x," y= ",y)
+
+            value = self.buildPopup()
+            self.adicionarValorALista(r, g, b, value)
+
+        self.check = False
+
+    def adicionarValorALista(self, r, g, b, value):
+        #print("NOVA LINHA")
+        self.tabela.append(r)
+        self.tabela.append(g)
+        self.tabela.append(b)
+        self.tabela.append(value)
+        print("+ Linha", self.tabela)
+        #self.close()
+
+    def getTabela(self):
+        return self.tabela
+
+    def convertQImageToMat(self, incomingImage):
+        incomingImage = incomingImage.convertToFormat(4)
+
+        width = incomingImage.width()
+        height = incomingImage.height()
+
+        ptr = incomingImage.bits()
+        ptr.setsize(incomingImage.byteCount())
+        arr = np.array(ptr).reshape(height, width, 4)  #  Copies the data
+        return arr
+
+    def buildPopup(self):
+        #name = item.text()
+        exPopup = popupValor()
+        #self.exPopup.show()
+        exPopup.exec_()
+        value = exPopup.getValor()
+        #print("Pegou valor:", value)
+        return value
+
+class popupValor(QDialog):
     def __init__(self):
-        super(Test, self).__init__()
+        super().__init__()
 
-        self.b1 = KeyButton("1")
-        self.b2 = KeyButton("2")
-        self.b3 = KeyButton("3")
-        self.b4 = KeyButton("4")
+        self.resize(270, 120)
+        #self.center()
+        self.setWindowFlags(Qt.WindowStaysOnTopHint)
 
-        self.layout = QGridLayout(self)
-        self.layout.addWidget(self.b1,0,0)
-        self.layout.addWidget(self.b2,0,1)
-        self.layout.addWidget(self.b3,1,0)
-        self.layout.addWidget(self.b4,1,1)
+        wid = QWidget(self)
+        #self.setCentralWidget(wid)
+        self.layout = QVBoxLayout()
 
-if __name__ == '__main__':
+        self.valorLabel = QLabel("Valor (válido ppm, outra unidade ou característica):")
+        self.valorSubstancia = QLineEdit(self)
+        self.confirmarButton = QPushButton('Confirmar', enabled=True)
+        self.confirmarButton.clicked.connect(self.confirmarValor)
 
-    import sys
-    app = QApplication(sys.argv)
-    win = VirtualKeyboard()
-    win.show()
-    app.exec_()"""
+        self.layout.addWidget(self.valorLabel)
+        self.layout.addWidget(self.valorSubstancia)
+        self.layout.addWidget(self.confirmarButton)
+
+        wid.setLayout(self.layout)
+
+    def confirmarValor(self):
+        self.close()
+
+    def getValor(self):
+        return self.valorSubstancia.text()
+
+    def center(self):
+        qr = self.frameGeometry()
+        cp = QDesktopWidget().availableGeometry().center()
+        qr.moveCenter(cp)
+        self.move(qr.topLeft())
