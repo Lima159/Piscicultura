@@ -18,7 +18,7 @@ class ColorWindow(QMainWindow):
                 min_colours[(rd + gd + bd)] = name
             self.nameColor = min_colours[min(min_colours.keys())]
 
-    def __init__(self, r1, g1, b1, r2, g2, b2):
+    def __init__(self, r1, g1, b1, r2, g2, b2, result):
         super().__init__()
         
         #print(r1, g1, b1, r2, g2, b2)
@@ -53,14 +53,12 @@ class ColorWindow(QMainWindow):
 
         self.frame = QGroupBox(self)    
         self.frame.setFont(QFont('Arial', 9))
-        self.frame.setTitle("Selecionar análise")   
+        self.frame.setTitle("Resultado")   
         self.frame.setGeometry(20, 270, 250, 60)     
 
-        buttonParseAmonia = QPushButton(parent=self, text='Amônia')
-        buttonParseAmonia.setGeometry(30, 290, 70, 30)
+        buttonResult = QPushButton(parent=self, text=result)
+        buttonResult.setEnabled(False)
+        buttonResult.setGeometry(30, 290, 90, 30)
 
-        buttonParseNitrato = QPushButton(parent=self, text='Nitrato')
-        buttonParseNitrato.setGeometry(110, 290, 70, 30)
-
-        buttonParseNitrito = QPushButton(parent=self, text='Nitrito')
-        buttonParseNitrito.setGeometry(190, 290, 70, 30)
+        buttonRelatorio = QPushButton(parent=self, text='Gerar relatório')
+        buttonRelatorio.setGeometry(130, 290, 102, 30)

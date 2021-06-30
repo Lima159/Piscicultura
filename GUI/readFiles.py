@@ -23,7 +23,7 @@ def get_closet_color(color, arquivo):
 	    		array_color_row.append(row[0])
 	    		array_color_row.append(row[1])
 	    		array_color_row.append(row[2])
-	    		array_colors.append(array_color_row)
+	    		array_colors.append(array_color_row)	    		
 	    	line_count += 1
 
 	    #Converte array em inteiros
@@ -35,3 +35,22 @@ def get_closet_color(color, arquivo):
 	    closest_color = closest(array_colors,color) #Calculo de aproximação
 	    print("\nCor aproximada:" + str(closest_color))
 	    return closest_color
+
+def get_resultado(closest_color, arquivo):
+	red = closest_color[0][0]
+	green = closest_color[0][1]
+	blue = closest_color[0][2]
+
+	with open(arquivo) as csv_file:
+		csv_reader = csv.reader(csv_file, delimiter=',')
+		line_count = 0
+		result = 0
+
+		for row in csv_reader:
+			if line_count != 0:
+				if(int(row[0]) == red and int(row[1]) == green and int(row[2]) == blue):
+					result = row[3]					
+
+			line_count += 1
+
+	return result

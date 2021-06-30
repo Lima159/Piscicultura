@@ -18,6 +18,12 @@ class CalibrateWindow(QWidget):
         self.textSubstancia = QLineEdit(self)
         layout.addRow("Substância:", self.textSubstancia)
 
+        self.keyListByLines = [
+                    ['1', '2', '3'],
+                    ['4', '5', '6'],
+                    ['7', '8', '9'],
+                ]
+
         self.buttonArquivo = QPushButton('Abrir arquivo', self)
         self.buttonArquivo.clicked.connect(self.openFile)   
         layout.addRow("Documento:", self.buttonArquivo)

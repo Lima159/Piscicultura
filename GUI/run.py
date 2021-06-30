@@ -68,7 +68,10 @@ class QImageViewer(QMainWindow):
         dominant_color = color_thief.get_color(quality=1)
         #print("Dominante:", dominant_color)
         closest_color = readFiles.get_closet_color(list(dominant_color), mensuracao)
-        self.colorView = ColorWindow(closest_color[0][0], closest_color[0][1], closest_color[0][2], dominant_color[0], dominant_color[1], dominant_color[2])
+        resultado_analise = readFiles.get_resultado(closest_color, mensuracao)
+        print("Resultado: " + str(resultado_analise))
+        self.colorView = ColorWindow(closest_color[0][0], closest_color[0][1], closest_color[0][2], 
+            dominant_color[0], dominant_color[1], dominant_color[2], resultado_analise)
         self.colorView.setWindowTitle("Análise de cores");
         self.colorView.show()
 
@@ -218,9 +221,9 @@ if __name__ == '__main__':
     imageViewer = QImageViewer()
     imageViewer.show()
     imageViewer.setWindowTitle("AquaSys")
-    imageViewer.setWindowIcon(QtGui.QIcon('fish.png'))
+    imageViewer.setWindowIcon(QtGui.QIcon('resources/fish.png'))
 
-    splash = QSplashScreen(QPixmap('ifba.jpg'))
+    splash = QSplashScreen(QPixmap('resources/ifba.jpg'))
     splash.show()
     QTimer.singleShot(2000, splash.close)
 
